@@ -43,14 +43,9 @@ class AdvertisementSerializer(serializers.ModelSerializer):
         status_for_closing = data.get('status')  # отрабатывается ситуация закрытия объявления при превышении лимита
         if status_for_closing == 'CLOSED':
             return data
-        advs = Advertisement.objects.filter(creator=self.context["request"].user)
-        advs_count = 0  # Счетчик открытых объявлений
+        advs = Advertisement.objects.filter(creator=self.context["request"].user, status='OPEN')
+        advs_count = advs.count()  # Определение количества объявлений
         limit_advs = 10  # Лимит открытых объявлений для пользователя
-
-        for adv in advs:
-            if adv.status == 'OPEN':
-                advs_count += 1
-        print(advs_count)
         if advs_count > limit_advs:
             raise serializers.ValidationError('Exceeded the number of active advertisements')
         return data
